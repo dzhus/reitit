@@ -221,4 +221,16 @@
       (is (= {:query {:x [:a :b]}}
              (-> (r/match-by-path router "/olipa/kerran")
                  (assoc :query-params {:x ["__a" "__b"]})
+                 (coercion/coerce!))))))
+  (testing "default values for optional query params missing from request"
+    (let [router (r/router ["/test"
+                            {:name ::route
+                             :coercion reitit.coercion.malli/coercion
+                             :parameters {:query [:map
+                                                  [:x {:optional true}
+                                                   [:keyword {:default :a}]]]}}]
+                           {:compile coercion/compile-request-coercers})]
+      (is (= {:query {:x :a}}
+             (-> (r/match-by-path router "/test")
+                 (assoc :query-params {})
                  (coercion/coerce!)))))))
